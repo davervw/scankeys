@@ -209,7 +209,10 @@ lookupkey:
 	lda #$5F ; upper right triangle shape
 	bne ++
 +	cmp #$20
-	bcs +
+	bne +
+	lda #$A0
+	bne ++
++	bcs +
 	ora #$80
 	bne ++
 +	cmp #$80

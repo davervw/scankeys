@@ -26,9 +26,9 @@
     24                          kbdmatrix=$eb81
     25                          
     26                          *=$c000
-    27  c000 a9b2               	lda #<title
+    27  c000 a9b8               	lda #<title
     28  c002 a2c1               	ldx #>title
-    29  c004 20a1c1             	jsr strout
+    29  c004 20a7c1             	jsr strout
     30  c007 78                 	sei
     31  c008 a2ff               	ldx #$ff
     32  c00a 8e02dc             	stx CIDDRA ; set port A as 8 outputs
@@ -181,7 +181,7 @@
    179  c135 a923               	lda #'#'
    180  c137 8dbe05             	sta videoram+446
    181  c13a a526               	lda scancode
-   182  c13c 2095c1             	jsr div10
+   182  c13c 209bc1             	jsr div10
    183  c13f 09b0               	ora #$B0 ; convert to inverse digit
    184  c141 8dc005             	sta videoram+448
    185  c144 8a                 	txa
@@ -201,50 +201,53 @@
    199  c164 c901               	cmp #1
    200  c166 d004               	bne +
    201  c168 a99e               	lda #$9E ; Reverse up arrow
-   202  c16a d026               	bne ++
+   202  c16a d02c               	bne ++
    203  c16c c902               +	cmp #2
    204  c16e d004               	bne +
    205  c170 a9bd               	lda #'='+128
-   206  c172 d01e               	bne ++
+   206  c172 d024               	bne ++
    207  c174 c904               +	cmp #4
    208  c176 d004               	bne +
    209  c178 a95f               	lda #$5F ; upper right triangle shape
-   210  c17a d016               	bne ++
+   210  c17a d01c               	bne ++
    211  c17c c920               +	cmp #$20
-   212  c17e b004               	bcs +
-   213  c180 0980               	ora #$80
-   214  c182 d00e               	bne ++
-   215  c184 c980               +	cmp #$80
-   216  c186 9004               	bcc +
-   217  c188 0940               	ora #$40
-   218  c18a d006               	bne ++
-   219  c18c c940               +	cmp #$40
-   220  c18e 9002               	bcc ++
-   221  c190 4940               	eor #$40	
-   222  c192 a628               ++	ldx savex
-   223  c194 60                 	rts
-   224                          div10: ; take A and divide by 10, remainder in A, answer in X
-   225  c195 a200               	ldx #0
-   226  c197 c90a               -	cmp #10
-   227  c199 9005               	bcc +
-   228  c19b e90a               	sbc #10
-   229  c19d e8                 	inx
-   230  c19e d0f7               	bne -
-   231  c1a0 60                 +	rts
-   232                          strout:
-   233  c1a1 85fb               	sta $fb
-   234  c1a3 86fc               	stx $fc
-   235  c1a5 a000               	ldy #0
-   236  c1a7 b1fb               -	lda ($fb),y
-   237  c1a9 f006               	beq +
-   238  c1ab 20d2ff             	jsr CHROUT
-   239  c1ae c8                 	iny
-   240  c1af d0f6               	bne -
-   241  c1b1 60                 +	rts
-   242                          
-   243                          title: 
-   244  c1b2 93                 	!byte 147
-   245  c1b3 1111111111111111...	!byte 17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17
-   246  c1ca 125343414e4b4559...	!text 18,"SCANKEYS (C) 2024     GITHUB.COM/DAVERVW"
-   247  c1f3 9d9d1112209d9420...	!text 157,157,17,18,32,157,148,32,157,145,145,13,17
-   248  c200 1242592044415649...	!text 18,"BY DAVID R. VAN WAGNER       DAVEVW.COM"
+   212  c17e d004               	bne +
+   213  c180 a9a0               	lda #$A0
+   214  c182 d014               	bne ++
+   215  c184 b004               +	bcs +
+   216  c186 0980               	ora #$80
+   217  c188 d00e               	bne ++
+   218  c18a c980               +	cmp #$80
+   219  c18c 9004               	bcc +
+   220  c18e 0940               	ora #$40
+   221  c190 d006               	bne ++
+   222  c192 c940               +	cmp #$40
+   223  c194 9002               	bcc ++
+   224  c196 4940               	eor #$40	
+   225  c198 a628               ++	ldx savex
+   226  c19a 60                 	rts
+   227                          div10: ; take A and divide by 10, remainder in A, answer in X
+   228  c19b a200               	ldx #0
+   229  c19d c90a               -	cmp #10
+   230  c19f 9005               	bcc +
+   231  c1a1 e90a               	sbc #10
+   232  c1a3 e8                 	inx
+   233  c1a4 d0f7               	bne -
+   234  c1a6 60                 +	rts
+   235                          strout:
+   236  c1a7 85fb               	sta $fb
+   237  c1a9 86fc               	stx $fc
+   238  c1ab a000               	ldy #0
+   239  c1ad b1fb               -	lda ($fb),y
+   240  c1af f006               	beq +
+   241  c1b1 20d2ff             	jsr CHROUT
+   242  c1b4 c8                 	iny
+   243  c1b5 d0f6               	bne -
+   244  c1b7 60                 +	rts
+   245                          
+   246                          title: 
+   247  c1b8 93                 	!byte 147
+   248  c1b9 1111111111111111...	!byte 17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17
+   249  c1d0 125343414e4b4559...	!text 18,"SCANKEYS (C) 2024     GITHUB.COM/DAVERVW"
+   250  c1f9 9d9d1112209d9420...	!text 157,157,17,18,32,157,148,32,157,145,145,13,17
+   251  c206 1242592044415649...	!text 18,"BY DAVID R. VAN WAGNER       DAVEVW.COM"
