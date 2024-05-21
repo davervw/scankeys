@@ -206,7 +206,7 @@ lookupkey:
 	bne ++
 +	cmp #4
 	bne +
-	lda #3+128
+	lda #$5F ; upper right triangle shape
 	bne ++
 +	cmp #$20
 	bcs +
