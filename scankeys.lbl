@@ -1,4 +1,4 @@
-	color	= $e
+	color	= $286
 	zvideo	= $fb
 	CIDDRB	= $dc03
 	CIDDRA	= $dc02
@@ -7,3 +7,5 @@
 	CIAPRB	= $dc01
 	CIAPRA	= $dc00
 	colorram	= $d800
+	clearscreen	= $93
+	CHROUT	= $ffd2

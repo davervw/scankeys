@@ -9,13 +9,18 @@ CIAPRB=$dc01 ; CIA#1 Data Port Register B
 CIDDRA=$dc02 ; CIA#1 Data Direction Register A (controls port A lines whether in[0]/out[1])
 CIDDRB=$dc03 ; CIA#1 Data Direction Register B (controls port B lines whether in[0]/out[1])
 
+CHROUT=$ffd2 ; KERNAL character out
+
 videoram=$0400
 colorram=$d800
-color=14
+color=$286 ; 646 decimal
 zvideo=$fb
 zcolor=$fd
+clearscreen=147
 
 *=$c000
+	lda #clearscreen
+	jsr CHROUT
 	sei
 	ldx #$ff
 	stx CIDDRA ; set port A as 8 outputs
@@ -25,7 +30,7 @@ zcolor=$fd
 	lda #'7'
 -	sta videoram,y
 	pha
-	lda #color
+	lda color
 	sta colorram,y
 	iny
 	pla
@@ -34,7 +39,7 @@ zcolor=$fd
 	cmp #'0'-1 ; out of digits?
 	bne - ; branch if more digits
 	ldx #'0' ; row heading
-	ldy #color
+	ldy color
 	stx videoram+40
 	sty colorram+40
 	inx
@@ -77,7 +82,7 @@ zcolor=$fd
 	bcc +
 	lda #' ' ; not pressed
 +	sta (zvideo),y ; videoram pointer for key
-	lda #color
+	lda color
 	sta (zcolor),y ; colorram pointer for key
 	pla ; restore keys
 	iny

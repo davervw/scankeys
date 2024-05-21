@@ -1,4 +1,4 @@
-# scankeys - Commodore 64 #
+# scankeys - demo Commodore 64 keyboard matrix #
 
 Actively scan Commodore 64 keyboard matrix and display pressed keys on screen
 
