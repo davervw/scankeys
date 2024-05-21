@@ -182,10 +182,10 @@
    180  c137 8d0a04             	sta videoram+10
    181  c13a a526               	lda scancode
    182  c13c 2095c1             	jsr div10
-   183  c13f 0930               	ora #$30
+   183  c13f 09b0               	ora #$B0 ; convert to inverse digit
    184  c141 8d0c04             	sta videoram+12
    185  c144 8a                 	txa
-   186  c145 0930               	ora #$30
+   186  c145 09b0               	ora #$B0 ; convert to inverse digit
    187  c147 8d0b04             	sta videoram+11
    188  c14a ac8602             	ldy color
    189  c14d 8c0ad8             	sty colorram+10

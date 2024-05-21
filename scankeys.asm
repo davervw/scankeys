@@ -180,10 +180,10 @@ alreadyfound:
 	sta videoram+10
 	lda scancode
 	jsr div10
-	ora #$30
+	ora #$B0 ; convert to inverse digit
 	sta videoram+12
 	txa
-	ora #$30
+	ora #$B0 ; convert to inverse digit
 	sta videoram+11
 	ldy color
 	sty colorram+10
