@@ -162,33 +162,33 @@ alreadyfound:
 	cmp #$BA ; out of bounds for numeric?
 	bcc + ; branch if okay
 	adc #$C6 ; convert to A..F
-+   sta videoram+1
++   sta videoram+443
 	lda color	
-	sta colorram
-	sta colorram+1
-	sta colorram+2
+	sta colorram+442
+	sta colorram+443
+	sta colorram+444
 	lda #'$'
-	sta videoram
+	sta videoram+442
 	lda scancode
 	and #$0F
 	ora #$B0
 	cmp #$BA
 	bcc +
 	adc #$C6
-+	sta videoram+2
++	sta videoram+444
 	lda #'#'
-	sta videoram+10
+	sta videoram+446
 	lda scancode
 	jsr div10
 	ora #$B0 ; convert to inverse digit
-	sta videoram+12
+	sta videoram+448
 	txa
 	ora #$B0 ; convert to inverse digit
-	sta videoram+11
+	sta videoram+447
 	ldy color
-	sty colorram+10
-	sty colorram+11
-	sty colorram+12
+	sty colorram+446
+	sty colorram+447
+	sty colorram+448
 	jmp ---
 lookupkey:
 	stx savex

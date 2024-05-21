@@ -164,33 +164,33 @@
    162  c10c c9ba               	cmp #$BA ; out of bounds for numeric?
    163  c10e 9002               	bcc + ; branch if okay
    164  c110 69c6               	adc #$C6 ; convert to A..F
-   165  c112 8d0104             +   sta videoram+1
+   165  c112 8dbb05             +   sta videoram+443
    166  c115 ad8602             	lda color	
-   167  c118 8d00d8             	sta colorram
-   168  c11b 8d01d8             	sta colorram+1
-   169  c11e 8d02d8             	sta colorram+2
+   167  c118 8dbad9             	sta colorram+442
+   168  c11b 8dbbd9             	sta colorram+443
+   169  c11e 8dbcd9             	sta colorram+444
    170  c121 a924               	lda #'$'
-   171  c123 8d0004             	sta videoram
+   171  c123 8dba05             	sta videoram+442
    172  c126 a526               	lda scancode
    173  c128 290f               	and #$0F
    174  c12a 09b0               	ora #$B0
    175  c12c c9ba               	cmp #$BA
    176  c12e 9002               	bcc +
    177  c130 69c6               	adc #$C6
-   178  c132 8d0204             +	sta videoram+2
+   178  c132 8dbc05             +	sta videoram+444
    179  c135 a923               	lda #'#'
-   180  c137 8d0a04             	sta videoram+10
+   180  c137 8dbe05             	sta videoram+446
    181  c13a a526               	lda scancode
    182  c13c 2095c1             	jsr div10
    183  c13f 09b0               	ora #$B0 ; convert to inverse digit
-   184  c141 8d0c04             	sta videoram+12
+   184  c141 8dc005             	sta videoram+448
    185  c144 8a                 	txa
    186  c145 09b0               	ora #$B0 ; convert to inverse digit
-   187  c147 8d0b04             	sta videoram+11
+   187  c147 8dbf05             	sta videoram+447
    188  c14a ac8602             	ldy color
-   189  c14d 8c0ad8             	sty colorram+10
-   190  c150 8c0bd8             	sty colorram+11
-   191  c153 8c0cd8             	sty colorram+12
+   189  c14d 8cbed9             	sty colorram+446
+   190  c150 8cbfd9             	sty colorram+447
+   191  c153 8cc0d9             	sty colorram+448
    192  c156 4c9fc0             	jmp ---
    193                          lookupkey:
    194  c159 8628               	stx savex
