@@ -37,23 +37,23 @@ kbdmatrix=$eb81
 	ldy color
 	sta videoram+4
 	sty colorram+4
-	sta videoram+120
-	sty colorram+120
+	sta videoram+160
+	sty colorram+160
 	lda #'C'-64+128
 	sta videoram+5
 	sty colorram+5
-	sta videoram+160
-	sty colorram+160
+	sta videoram+200
+	sty colorram+200
 	lda #'0'+128
 	sta videoram+6
 	sty colorram+6
 	sta videoram+7
 	sty colorram+7
-	sta videoram+200
-	sty colorram+200
-	lda #'1'+128
 	sta videoram+240
 	sty colorram+240
+	lda #'1'+128
+	sta videoram+280
+	sty colorram+280
 
 	ldy #42 ; second screen row, third column for heading
 	lda #'7'

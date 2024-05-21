@@ -39,23 +39,23 @@
     37  c013 ac8602             	ldy color
     38  c016 8d0404             	sta videoram+4
     39  c019 8c04d8             	sty colorram+4
-    40  c01c 8d7804             	sta videoram+120
-    41  c01f 8c78d8             	sty colorram+120
+    40  c01c 8da004             	sta videoram+160
+    41  c01f 8ca0d8             	sty colorram+160
     42  c022 a983               	lda #'C'-64+128
     43  c024 8d0504             	sta videoram+5
     44  c027 8c05d8             	sty colorram+5
-    45  c02a 8da004             	sta videoram+160
-    46  c02d 8ca0d8             	sty colorram+160
+    45  c02a 8dc804             	sta videoram+200
+    46  c02d 8cc8d8             	sty colorram+200
     47  c030 a9b0               	lda #'0'+128
     48  c032 8d0604             	sta videoram+6
     49  c035 8c06d8             	sty colorram+6
     50  c038 8d0704             	sta videoram+7
     51  c03b 8c07d8             	sty colorram+7
-    52  c03e 8dc804             	sta videoram+200
-    53  c041 8cc8d8             	sty colorram+200
+    52  c03e 8df004             	sta videoram+240
+    53  c041 8cf0d8             	sty colorram+240
     54  c044 a9b1               	lda #'1'+128
-    55  c046 8df004             	sta videoram+240
-    56  c049 8cf0d8             	sty colorram+240
+    55  c046 8d1805             	sta videoram+280
+    56  c049 8c18d9             	sty colorram+280
     57                          
     58  c04c a02a               	ldy #42 ; second screen row, third column for heading
     59  c04e a937               	lda #'7'
@@ -208,7 +208,7 @@
    206  c172 d01e               	bne ++
    207  c174 c904               +	cmp #4
    208  c176 d004               	bne +
-   209  c178 a983               	lda #3+128
+   209  c178 a95f               	lda #$5F ; upper right triangle shape
    210  c17a d016               	bne ++
    211  c17c c920               +	cmp #$20
    212  c17e b004               	bcs +
