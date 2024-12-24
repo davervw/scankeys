@@ -49,13 +49,13 @@
     47  c030 a9b0               	lda #'0'+128
     48  c032 8d0604             	sta videoram+6
     49  c035 8c06d8             	sty colorram+6
-    50  c038 8d0704             	sta videoram+7
-    51  c03b 8c07d8             	sty colorram+7
-    52  c03e 8df004             	sta videoram+240
-    53  c041 8cf0d8             	sty colorram+240
+    50  c038 8df004             	sta videoram+240
+    51  c03b 8cf0d8             	sty colorram+240
+    52  c03e 8d1805             	sta videoram+280
+    53  c041 8c18d9             	sty colorram+280
     54  c044 a9b1               	lda #'1'+128
-    55  c046 8d1805             	sta videoram+280
-    56  c049 8c18d9             	sty colorram+280
+    55  c046 8d0704             	sta videoram+7
+    56  c049 8c07d8             	sty colorram+7
     57                          
     58  c04c a02a               	ldy #42 ; second screen row, third column for heading
     59  c04e a937               	lda #'7'
