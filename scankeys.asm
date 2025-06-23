@@ -1,5 +1,5 @@
 ; scankeys.asm - Commodore 64 test/demo keyboard scan
-; Copyright (c) 2023, 2024 by David Van Wagner ALL RIGHTS RESERVED
+; Copyright (c) 2023, 2024, 2025 by David Van Wagner ALL RIGHTS RESERVED
 ; MIT LICENSE
 ; github.com/davervw
 ; www.davevw.com
@@ -21,9 +21,11 @@ scancode=$26
 found=$27
 savex=$28
 keycounter=$ff
-kbdmatrix=$eb81
+curkey=$cb
+shiftstate=$28d
 
 *=$c000
+	jsr getkbdmatrix
 	lda #<title
 	ldx #>title
 	jsr strout
@@ -193,7 +195,8 @@ alreadyfound:
 lookupkey:
 	stx savex
 	ldx keycounter
-	lda kbdmatrix, x
+kbdmatrix=*+1
+	lda $eb81, x
 	cmp #$20
 	bcs +
 	cmp #1
@@ -242,11 +245,34 @@ strout:
 	iny
 	bne -
 +	rts
+getkbdmatrix:
+	sei
+	lda shiftstate
+	pha
+	lda curkey
+	pha
+	lda #0
+	sta shiftstate
+	lda #$40
+	sta curkey
+	jsr getmap
+	ldx $f5
+	ldy $f6
+	stx kbdmatrix
+	sty kbdmatrix+1
+	pla
+	sta curkey
+	pla
+	sta shiftstate
+	cli
+	rts
+getmap:
+	jmp ($028f)
 
 title: 
 	!byte 147
 	!byte 17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17
-	!text 18,"SCANKEYS (C) 2024     GITHUB.COM/DAVERVW"
+	!text 18,"SCANKEYS (C) 2025     GITHUB.COM/DAVERVW"
 	!text 157,157,17,18,32,157,148,32,157,145,145,13,17
 	!text 18,"BY DAVID R. VAN WAGNER       DAVEVW.COM"
 	!byte 0

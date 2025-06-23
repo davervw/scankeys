@@ -1,7 +1,7 @@
 
 ; ******** Source: scankeys.asm
      1                          ; scankeys.asm - Commodore 64 test/demo keyboard scan
-     2                          ; Copyright (c) 2023, 2024 by David Van Wagner ALL RIGHTS RESERVED
+     2                          ; Copyright (c) 2023, 2024, 2025 by David Van Wagner ALL RIGHTS RESERVED
      3                          ; MIT LICENSE
      4                          ; github.com/davervw
      5                          ; www.davevw.com
@@ -23,231 +23,257 @@
     21                          found=$27
     22                          savex=$28
     23                          keycounter=$ff
-    24                          kbdmatrix=$eb81
-    25                          
-    26                          *=$c000
-    27  c000 a9b8               	lda #<title
-    28  c002 a2c1               	ldx #>title
-    29  c004 20a7c1             	jsr strout
-    30  c007 78                 	sei
-    31  c008 a2ff               	ldx #$ff
-    32  c00a 8e02dc             	stx CIDDRA ; set port A as 8 outputs
-    33  c00d e8                 	inx
-    34  c00e 8e03dc             	stx CIDDRB ; set port B as 8 inputs
-    35                          
-    36  c011 a984               	lda #'D'-64+128 ; to screen code, and reverse
-    37  c013 ac8602             	ldy color
-    38  c016 8d0404             	sta videoram+4
-    39  c019 8c04d8             	sty colorram+4
-    40  c01c 8da004             	sta videoram+160
-    41  c01f 8ca0d8             	sty colorram+160
-    42  c022 a983               	lda #'C'-64+128
-    43  c024 8d0504             	sta videoram+5
-    44  c027 8c05d8             	sty colorram+5
-    45  c02a 8dc804             	sta videoram+200
-    46  c02d 8cc8d8             	sty colorram+200
-    47  c030 a9b0               	lda #'0'+128
-    48  c032 8d0604             	sta videoram+6
-    49  c035 8c06d8             	sty colorram+6
-    50  c038 8df004             	sta videoram+240
-    51  c03b 8cf0d8             	sty colorram+240
-    52  c03e 8d1805             	sta videoram+280
-    53  c041 8c18d9             	sty colorram+280
-    54  c044 a9b1               	lda #'1'+128
-    55  c046 8d0704             	sta videoram+7
-    56  c049 8c07d8             	sty colorram+7
-    57                          
-    58  c04c a02a               	ldy #42 ; second screen row, third column for heading
-    59  c04e a937               	lda #'7'
-    60  c050 990004             -	sta videoram,y
-    61  c053 48                 	pha
-    62  c054 ad8602             	lda color
-    63  c057 9900d8             	sta colorram,y
-    64  c05a c8                 	iny
-    65  c05b 68                 	pla
-    66  c05c 38                 	sec
-    67  c05d e901               	sbc #1
-    68  c05f c92f               	cmp #'0'-1 ; out of digits?
-    69  c061 d0ed               	bne - ; branch if more digits
-    70  c063 a230               	ldx #'0' ; row heading
-    71  c065 ac8602             	ldy color
-    72  c068 8e5104             	stx videoram+81
-    73  c06b 8c51d8             	sty colorram+81
-    74  c06e e8                 	inx
-    75  c06f 8e7904             	stx videoram+121
-    76  c072 8c79d8             	sty colorram+121
-    77  c075 e8                 	inx
-    78  c076 8ea104             	stx videoram+161
-    79  c079 8ca1d8             	sty colorram+161
-    80  c07c e8                 	inx
-    81  c07d 8ec904             	stx videoram+201
-    82  c080 8cc9d8             	sty colorram+201
-    83  c083 e8                 	inx
-    84  c084 8ef104             	stx videoram+241
-    85  c087 8cf1d8             	sty colorram+241
-    86  c08a e8                 	inx
-    87  c08b 8e1905             	stx videoram+281
-    88  c08e 8c19d9             	sty colorram+281
-    89  c091 e8                 	inx
-    90  c092 8e4105             	stx videoram+321
-    91  c095 8c41d9             	sty colorram+321
-    92  c098 e8                 	inx
-    93  c099 8e6905             	stx videoram+361
-    94  c09c 8c69d9             	sty colorram+361
-    95  c09f a952               --- lda #<(videoram+82)
-    96  c0a1 85fb               	sta zvideo
-    97  c0a3 85fd               	sta zcolor
-    98  c0a5 a904               	lda #>(videoram+82)
-    99  c0a7 85fc               	sta zvideo+1
-   100  c0a9 a9d8               	lda #>(colorram+82)
-   101  c0ab 85fe               	sta zcolor+1
-   102                          
-   103                          	; initialize scancode variables
-   104  c0ad a93f               	lda #63
-   105  c0af 85ff               	sta keycounter ; count for scan codes
-   106  c0b1 8527               	sta found
-   107  c0b3 a940               	lda #64
-   108  c0b5 8526               	sta scancode
-   109                          
-   110  c0b7 a97f               	lda #$7F ; start with bit 7 grounded
-   111  c0b9 a000               --	ldy #0 ; count number of scanlines
-   112  c0bb 8d00dc             	sta CIAPRA ; output keyboard scanline
-   113  c0be ae01dc             	ldx CIAPRB ; read keys pressed
-   114  c0c1 48                 	pha ; save scanline
-   115  c0c2 8a                 	txa
-   116  c0c3 0a                 -	asl ; shift keys into carry one by one
-   117  c0c4 48                 	pha ; save keys
-   118  c0c5 a920               	lda #' ' ; not pressed
-   119  c0c7 b00a               	bcs +
-   120                          	; bit found
-   121                          	; bmi alreadyfound
-   122  c0c9 a5ff               	lda keycounter
-   123  c0cb 8526               	sta scancode
-   124  c0cd 38                 	sec
-   125  c0ce 6627               	ror found ; mark found
-   126                          alreadyfound:	
-   127  c0d0 2059c1             	jsr lookupkey
-   128  c0d3 91fb               +	sta (zvideo),y ; videoram pointer for key
-   129  c0d5 ad8602             	lda color
-   130  c0d8 91fd               	sta (zcolor),y ; colorram pointer for key
-   131  c0da 68                 	pla ; restore keys
-   132  c0db c6ff               	dec keycounter
-   133  c0dd c8                 	iny
-   134  c0de c008               	cpy #8 ; completed the row?
-   135  c0e0 d0e1               	bne - ; branch if more on row
-   136  c0e2 68                 	pla ; restore scanline
-   137  c0e3 38                 	sec
-   138  c0e4 6a                 	ror ; inject bit while shifting
-   139  c0e5 c9ff               	cmp #$ff ; check for all bits set
-   140  c0e7 f01b               	beq ++ ; branch if done
-   141  c0e9 48                 	pha ; save scanline
-   142  c0ea 18                 	clc
-   143  c0eb a5fb               	lda zvideo
-   144  c0ed 6928               	adc #40 ; columns on screen, advance to next line
-   145  c0ef 85fb               	sta zvideo
-   146  c0f1 9002               	bcc +
-   147  c0f3 e6fc               	inc zvideo+1
-   148  c0f5 18                 +	clc
-   149  c0f6 a5fd               	lda zcolor
-   150  c0f8 6928               	adc #40 ; columns on screen, advance to next line
-   151  c0fa 85fd               	sta zcolor
-   152  c0fc 9002               	bcc +
-   153  c0fe e6fe               	inc zcolor+1
-   154  c100 68                 +	pla ; restore scanline
-   155  c101 4cb9c0             	jmp --
-   156  c104 a526               ++	lda scancode
-   157  c106 4a                 	lsr
-   158  c107 4a                 	lsr
-   159  c108 4a                 	lsr
-   160  c109 4a                 	lsr
-   161  c10a 09b0               	ora #$B0 ; reverse zero
-   162  c10c c9ba               	cmp #$BA ; out of bounds for numeric?
-   163  c10e 9002               	bcc + ; branch if okay
-   164  c110 69c6               	adc #$C6 ; convert to A..F
-   165  c112 8dbb05             +   sta videoram+443
-   166  c115 ad8602             	lda color	
-   167  c118 8dbad9             	sta colorram+442
-   168  c11b 8dbbd9             	sta colorram+443
-   169  c11e 8dbcd9             	sta colorram+444
-   170  c121 a924               	lda #'$'
-   171  c123 8dba05             	sta videoram+442
-   172  c126 a526               	lda scancode
-   173  c128 290f               	and #$0F
-   174  c12a 09b0               	ora #$B0
-   175  c12c c9ba               	cmp #$BA
-   176  c12e 9002               	bcc +
-   177  c130 69c6               	adc #$C6
-   178  c132 8dbc05             +	sta videoram+444
-   179  c135 a923               	lda #'#'
-   180  c137 8dbe05             	sta videoram+446
-   181  c13a a526               	lda scancode
-   182  c13c 209bc1             	jsr div10
-   183  c13f 09b0               	ora #$B0 ; convert to inverse digit
-   184  c141 8dc005             	sta videoram+448
-   185  c144 8a                 	txa
-   186  c145 09b0               	ora #$B0 ; convert to inverse digit
-   187  c147 8dbf05             	sta videoram+447
-   188  c14a ac8602             	ldy color
-   189  c14d 8cbed9             	sty colorram+446
-   190  c150 8cbfd9             	sty colorram+447
-   191  c153 8cc0d9             	sty colorram+448
-   192  c156 4c9fc0             	jmp ---
-   193                          lookupkey:
-   194  c159 8628               	stx savex
-   195  c15b a6ff               	ldx keycounter
-   196  c15d bd81eb             	lda kbdmatrix, x
-   197  c160 c920               	cmp #$20
-   198  c162 b008               	bcs +
-   199  c164 c901               	cmp #1
-   200  c166 d004               	bne +
-   201  c168 a99e               	lda #$9E ; Reverse up arrow
-   202  c16a d02c               	bne ++
-   203  c16c c902               +	cmp #2
-   204  c16e d004               	bne +
-   205  c170 a9bd               	lda #'='+128
-   206  c172 d024               	bne ++
-   207  c174 c904               +	cmp #4
-   208  c176 d004               	bne +
-   209  c178 a95f               	lda #$5F ; upper right triangle shape
-   210  c17a d01c               	bne ++
-   211  c17c c920               +	cmp #$20
-   212  c17e d004               	bne +
-   213  c180 a9a0               	lda #$A0
-   214  c182 d014               	bne ++
-   215  c184 b004               +	bcs +
-   216  c186 0980               	ora #$80
-   217  c188 d00e               	bne ++
-   218  c18a c980               +	cmp #$80
-   219  c18c 9004               	bcc +
-   220  c18e 0940               	ora #$40
-   221  c190 d006               	bne ++
-   222  c192 c940               +	cmp #$40
-   223  c194 9002               	bcc ++
-   224  c196 4940               	eor #$40	
-   225  c198 a628               ++	ldx savex
-   226  c19a 60                 	rts
-   227                          div10: ; take A and divide by 10, remainder in A, answer in X
-   228  c19b a200               	ldx #0
-   229  c19d c90a               -	cmp #10
-   230  c19f 9005               	bcc +
-   231  c1a1 e90a               	sbc #10
-   232  c1a3 e8                 	inx
-   233  c1a4 d0f7               	bne -
-   234  c1a6 60                 +	rts
-   235                          strout:
-   236  c1a7 85fb               	sta $fb
-   237  c1a9 86fc               	stx $fc
-   238  c1ab a000               	ldy #0
-   239  c1ad b1fb               -	lda ($fb),y
-   240  c1af f006               	beq +
-   241  c1b1 20d2ff             	jsr CHROUT
-   242  c1b4 c8                 	iny
-   243  c1b5 d0f6               	bne -
-   244  c1b7 60                 +	rts
-   245                          
-   246                          title: 
-   247  c1b8 93                 	!byte 147
-   248  c1b9 1111111111111111...	!byte 17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17
-   249  c1d0 125343414e4b4559...	!text 18,"SCANKEYS (C) 2024     GITHUB.COM/DAVERVW"
-   250  c1f9 9d9d1112209d9420...	!text 157,157,17,18,32,157,148,32,157,145,145,13,17
-   251  c206 1242592044415649...	!text 18,"BY DAVID R. VAN WAGNER       DAVEVW.COM"
+    24                          curkey=$cb
+    25                          shiftstate=$28d
+    26                          
+    27                          *=$c000
+    28  c000 20bbc1             	jsr getkbdmatrix
+    29  c003 a9e5               	lda #<title
+    30  c005 a2c1               	ldx #>title
+    31  c007 20aac1             	jsr strout
+    32  c00a 78                 	sei
+    33  c00b a2ff               	ldx #$ff
+    34  c00d 8e02dc             	stx CIDDRA ; set port A as 8 outputs
+    35  c010 e8                 	inx
+    36  c011 8e03dc             	stx CIDDRB ; set port B as 8 inputs
+    37                          
+    38  c014 a984               	lda #'D'-64+128 ; to screen code, and reverse
+    39  c016 ac8602             	ldy color
+    40  c019 8d0404             	sta videoram+4
+    41  c01c 8c04d8             	sty colorram+4
+    42  c01f 8da004             	sta videoram+160
+    43  c022 8ca0d8             	sty colorram+160
+    44  c025 a983               	lda #'C'-64+128
+    45  c027 8d0504             	sta videoram+5
+    46  c02a 8c05d8             	sty colorram+5
+    47  c02d 8dc804             	sta videoram+200
+    48  c030 8cc8d8             	sty colorram+200
+    49  c033 a9b0               	lda #'0'+128
+    50  c035 8d0604             	sta videoram+6
+    51  c038 8c06d8             	sty colorram+6
+    52  c03b 8df004             	sta videoram+240
+    53  c03e 8cf0d8             	sty colorram+240
+    54  c041 8d1805             	sta videoram+280
+    55  c044 8c18d9             	sty colorram+280
+    56  c047 a9b1               	lda #'1'+128
+    57  c049 8d0704             	sta videoram+7
+    58  c04c 8c07d8             	sty colorram+7
+    59                          
+    60  c04f a02a               	ldy #42 ; second screen row, third column for heading
+    61  c051 a937               	lda #'7'
+    62  c053 990004             -	sta videoram,y
+    63  c056 48                 	pha
+    64  c057 ad8602             	lda color
+    65  c05a 9900d8             	sta colorram,y
+    66  c05d c8                 	iny
+    67  c05e 68                 	pla
+    68  c05f 38                 	sec
+    69  c060 e901               	sbc #1
+    70  c062 c92f               	cmp #'0'-1 ; out of digits?
+    71  c064 d0ed               	bne - ; branch if more digits
+    72  c066 a230               	ldx #'0' ; row heading
+    73  c068 ac8602             	ldy color
+    74  c06b 8e5104             	stx videoram+81
+    75  c06e 8c51d8             	sty colorram+81
+    76  c071 e8                 	inx
+    77  c072 8e7904             	stx videoram+121
+    78  c075 8c79d8             	sty colorram+121
+    79  c078 e8                 	inx
+    80  c079 8ea104             	stx videoram+161
+    81  c07c 8ca1d8             	sty colorram+161
+    82  c07f e8                 	inx
+    83  c080 8ec904             	stx videoram+201
+    84  c083 8cc9d8             	sty colorram+201
+    85  c086 e8                 	inx
+    86  c087 8ef104             	stx videoram+241
+    87  c08a 8cf1d8             	sty colorram+241
+    88  c08d e8                 	inx
+    89  c08e 8e1905             	stx videoram+281
+    90  c091 8c19d9             	sty colorram+281
+    91  c094 e8                 	inx
+    92  c095 8e4105             	stx videoram+321
+    93  c098 8c41d9             	sty colorram+321
+    94  c09b e8                 	inx
+    95  c09c 8e6905             	stx videoram+361
+    96  c09f 8c69d9             	sty colorram+361
+    97  c0a2 a952               --- lda #<(videoram+82)
+    98  c0a4 85fb               	sta zvideo
+    99  c0a6 85fd               	sta zcolor
+   100  c0a8 a904               	lda #>(videoram+82)
+   101  c0aa 85fc               	sta zvideo+1
+   102  c0ac a9d8               	lda #>(colorram+82)
+   103  c0ae 85fe               	sta zcolor+1
+   104                          
+   105                          	; initialize scancode variables
+   106  c0b0 a93f               	lda #63
+   107  c0b2 85ff               	sta keycounter ; count for scan codes
+   108  c0b4 8527               	sta found
+   109  c0b6 a940               	lda #64
+   110  c0b8 8526               	sta scancode
+   111                          
+   112  c0ba a97f               	lda #$7F ; start with bit 7 grounded
+   113  c0bc a000               --	ldy #0 ; count number of scanlines
+   114  c0be 8d00dc             	sta CIAPRA ; output keyboard scanline
+   115  c0c1 ae01dc             	ldx CIAPRB ; read keys pressed
+   116  c0c4 48                 	pha ; save scanline
+   117  c0c5 8a                 	txa
+   118  c0c6 0a                 -	asl ; shift keys into carry one by one
+   119  c0c7 48                 	pha ; save keys
+   120  c0c8 a920               	lda #' ' ; not pressed
+   121  c0ca b00a               	bcs +
+   122                          	; bit found
+   123                          	; bmi alreadyfound
+   124  c0cc a5ff               	lda keycounter
+   125  c0ce 8526               	sta scancode
+   126  c0d0 38                 	sec
+   127  c0d1 6627               	ror found ; mark found
+   128                          alreadyfound:	
+   129  c0d3 205cc1             	jsr lookupkey
+   130  c0d6 91fb               +	sta (zvideo),y ; videoram pointer for key
+   131  c0d8 ad8602             	lda color
+   132  c0db 91fd               	sta (zcolor),y ; colorram pointer for key
+   133  c0dd 68                 	pla ; restore keys
+   134  c0de c6ff               	dec keycounter
+   135  c0e0 c8                 	iny
+   136  c0e1 c008               	cpy #8 ; completed the row?
+   137  c0e3 d0e1               	bne - ; branch if more on row
+   138  c0e5 68                 	pla ; restore scanline
+   139  c0e6 38                 	sec
+   140  c0e7 6a                 	ror ; inject bit while shifting
+   141  c0e8 c9ff               	cmp #$ff ; check for all bits set
+   142  c0ea f01b               	beq ++ ; branch if done
+   143  c0ec 48                 	pha ; save scanline
+   144  c0ed 18                 	clc
+   145  c0ee a5fb               	lda zvideo
+   146  c0f0 6928               	adc #40 ; columns on screen, advance to next line
+   147  c0f2 85fb               	sta zvideo
+   148  c0f4 9002               	bcc +
+   149  c0f6 e6fc               	inc zvideo+1
+   150  c0f8 18                 +	clc
+   151  c0f9 a5fd               	lda zcolor
+   152  c0fb 6928               	adc #40 ; columns on screen, advance to next line
+   153  c0fd 85fd               	sta zcolor
+   154  c0ff 9002               	bcc +
+   155  c101 e6fe               	inc zcolor+1
+   156  c103 68                 +	pla ; restore scanline
+   157  c104 4cbcc0             	jmp --
+   158  c107 a526               ++	lda scancode
+   159  c109 4a                 	lsr
+   160  c10a 4a                 	lsr
+   161  c10b 4a                 	lsr
+   162  c10c 4a                 	lsr
+   163  c10d 09b0               	ora #$B0 ; reverse zero
+   164  c10f c9ba               	cmp #$BA ; out of bounds for numeric?
+   165  c111 9002               	bcc + ; branch if okay
+   166  c113 69c6               	adc #$C6 ; convert to A..F
+   167  c115 8dbb05             +   sta videoram+443
+   168  c118 ad8602             	lda color	
+   169  c11b 8dbad9             	sta colorram+442
+   170  c11e 8dbbd9             	sta colorram+443
+   171  c121 8dbcd9             	sta colorram+444
+   172  c124 a924               	lda #'$'
+   173  c126 8dba05             	sta videoram+442
+   174  c129 a526               	lda scancode
+   175  c12b 290f               	and #$0F
+   176  c12d 09b0               	ora #$B0
+   177  c12f c9ba               	cmp #$BA
+   178  c131 9002               	bcc +
+   179  c133 69c6               	adc #$C6
+   180  c135 8dbc05             +	sta videoram+444
+   181  c138 a923               	lda #'#'
+   182  c13a 8dbe05             	sta videoram+446
+   183  c13d a526               	lda scancode
+   184  c13f 209ec1             	jsr div10
+   185  c142 09b0               	ora #$B0 ; convert to inverse digit
+   186  c144 8dc005             	sta videoram+448
+   187  c147 8a                 	txa
+   188  c148 09b0               	ora #$B0 ; convert to inverse digit
+   189  c14a 8dbf05             	sta videoram+447
+   190  c14d ac8602             	ldy color
+   191  c150 8cbed9             	sty colorram+446
+   192  c153 8cbfd9             	sty colorram+447
+   193  c156 8cc0d9             	sty colorram+448
+   194  c159 4ca2c0             	jmp ---
+   195                          lookupkey:
+   196  c15c 8628               	stx savex
+   197  c15e a6ff               	ldx keycounter
+   198                          kbdmatrix=*+1
+   199  c160 bd81eb             	lda $eb81, x
+   200  c163 c920               	cmp #$20
+   201  c165 b008               	bcs +
+   202  c167 c901               	cmp #1
+   203  c169 d004               	bne +
+   204  c16b a99e               	lda #$9E ; Reverse up arrow
+   205  c16d d02c               	bne ++
+   206  c16f c902               +	cmp #2
+   207  c171 d004               	bne +
+   208  c173 a9bd               	lda #'='+128
+   209  c175 d024               	bne ++
+   210  c177 c904               +	cmp #4
+   211  c179 d004               	bne +
+   212  c17b a95f               	lda #$5F ; upper right triangle shape
+   213  c17d d01c               	bne ++
+   214  c17f c920               +	cmp #$20
+   215  c181 d004               	bne +
+   216  c183 a9a0               	lda #$A0
+   217  c185 d014               	bne ++
+   218  c187 b004               +	bcs +
+   219  c189 0980               	ora #$80
+   220  c18b d00e               	bne ++
+   221  c18d c980               +	cmp #$80
+   222  c18f 9004               	bcc +
+   223  c191 0940               	ora #$40
+   224  c193 d006               	bne ++
+   225  c195 c940               +	cmp #$40
+   226  c197 9002               	bcc ++
+   227  c199 4940               	eor #$40	
+   228  c19b a628               ++	ldx savex
+   229  c19d 60                 	rts
+   230                          div10: ; take A and divide by 10, remainder in A, answer in X
+   231  c19e a200               	ldx #0
+   232  c1a0 c90a               -	cmp #10
+   233  c1a2 9005               	bcc +
+   234  c1a4 e90a               	sbc #10
+   235  c1a6 e8                 	inx
+   236  c1a7 d0f7               	bne -
+   237  c1a9 60                 +	rts
+   238                          strout:
+   239  c1aa 85fb               	sta $fb
+   240  c1ac 86fc               	stx $fc
+   241  c1ae a000               	ldy #0
+   242  c1b0 b1fb               -	lda ($fb),y
+   243  c1b2 f006               	beq +
+   244  c1b4 20d2ff             	jsr CHROUT
+   245  c1b7 c8                 	iny
+   246  c1b8 d0f6               	bne -
+   247  c1ba 60                 +	rts
+   248                          getkbdmatrix:
+   249  c1bb 78                 	sei
+   250  c1bc ad8d02             	lda shiftstate
+   251  c1bf 48                 	pha
+   252  c1c0 a5cb               	lda curkey
+   253  c1c2 48                 	pha
+   254  c1c3 a900               	lda #0
+   255  c1c5 8d8d02             	sta shiftstate
+   256  c1c8 a940               	lda #$40
+   257  c1ca 85cb               	sta curkey
+   258  c1cc 20e2c1             	jsr getmap
+   259  c1cf a6f5               	ldx $f5
+   260  c1d1 a4f6               	ldy $f6
+   261  c1d3 8e61c1             	stx kbdmatrix
+   262  c1d6 8c62c1             	sty kbdmatrix+1
+   263  c1d9 68                 	pla
+   264  c1da 85cb               	sta curkey
+   265  c1dc 68                 	pla
+   266  c1dd 8d8d02             	sta shiftstate
+   267  c1e0 58                 	cli
+   268  c1e1 60                 	rts
+   269                          getmap:
+   270  c1e2 6c8f02             	jmp ($028f)
+   271                          
+   272                          title: 
+   273  c1e5 93                 	!byte 147
+   274  c1e6 1111111111111111...	!byte 17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17
+   275  c1fd 125343414e4b4559...	!text 18,"SCANKEYS (C) 2025     GITHUB.COM/DAVERVW"
+   276  c226 9d9d1112209d9420...	!text 157,157,17,18,32,157,148,32,157,145,145,13,17
+   277  c233 1242592044415649...	!text 18,"BY DAVID R. VAN WAGNER       DAVEVW.COM"
