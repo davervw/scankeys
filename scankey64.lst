@@ -1,5 +1,5 @@
 
-; ******** Source: scankeys.asm
+; ******** Source: scankey64.asm
      1                          ; scankeys.asm - Commodore 64 test/demo keyboard scan
      2                          ; Copyright (c) 2023, 2024, 2025 by David Van Wagner ALL RIGHTS RESERVED
      3                          ; MIT LICENSE
