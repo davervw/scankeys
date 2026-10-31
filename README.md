@@ -1,13 +1,21 @@
-# scankeys - demo Commodore 64 keyboard matrix #
+# scankeys - demo Commodore 64 and 128 keyboard matrix #
 
-Actively scan Commodore 64 keyboard matrix and display pressed keys on screen
+Actively scan Commodore 64/128 keyboard matrix and display pressed keys on screen
 
-Usage:
+C64 Usage (supports 64 keys):
 
 ````
-LOAD "SCANKEYS",8,1
+LOAD "SCANKEY64 49152",8,1
 SYS 49152
 ````
+
+C128 Usage (supports 90 keys):
+
+````
+LOAD "SCANKEY128 1300",8,1
+SYS DEC("1300")
+````
+
 
 STOP+RESTORE may get you to a BASIC prompt if you are lucky, keep trying (hold STOP, tap RESTORE repeatedly).  Otherwise reset system.
 
