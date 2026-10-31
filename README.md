@@ -12,8 +12,8 @@ SYS 49152
 C128 Usage (supports 90 keys):
 
 ````
-LOAD "SCANKEY128 1300",8,1
-SYS DEC("1300")
+LOAD "SCANKEY128 1700",8,1
+SYS DEC("1700")
 ````
 
 

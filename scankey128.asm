@@ -28,7 +28,7 @@ shiftstate=$d1
 keydecode=$033c
 keymap=$d000
 
-*=$1300
+*=$1700
 	lda #<pressakey
 	ldx #>pressakey
 	jsr strout
