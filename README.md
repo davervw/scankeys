@@ -19,4 +19,6 @@ SYS DEC("1300")
 
 STOP+RESTORE may get you to a BASIC prompt if you are lucky, keep trying (hold STOP, tap RESTORE repeatedly).  Otherwise reset system.
 
-![scankeys.png](scankeys.png)
+![scankey64.png](scankey64.png)
+
+![scankey128.png](scankey128.png)
