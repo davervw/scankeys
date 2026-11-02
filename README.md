@@ -26,6 +26,8 @@ SYS 49152
 
 STOP+RESTORE may get you to a BASIC prompt if you are lucky, keep trying (hold STOP, tap RESTORE repeatedly).  Otherwise reset system.
 
+Also see project [c-keymaps](https://github.com/davervw/c-keymaps) for more keyboard resources
+
 ![scankey64.png](scankey64.png)
 
 ![scankey128.png](scankey128.png)
