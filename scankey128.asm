@@ -1,5 +1,5 @@
 ; scankeys.asm - Commodore 64 test/demo keyboard scan
-; Copyright (c) 2023, 2024, 2025 by David Van Wagner ALL RIGHTS RESERVED
+; Copyright (c) 2026 by David Van Wagner ALL RIGHTS RESERVED
 ; MIT LICENSE
 ; github.com/davervw
 ; www.davevw.com
@@ -16,6 +16,9 @@ videoram=$0400
 colorram=$d800
 color=$f1 ; 241 decimal
 kbdline=$61 ; 0..10 ($0..$a)
+shiftscancode=$62
+computedshift=$63
+savescancode=$64
 scancode=$fa
 zvideo=$fb
 zcolor=$fd
@@ -133,6 +136,49 @@ keymap=$d000
 	inx
 	stx videoram+161
 	sty colorram+161
+
+	ldx #'I'-64
+	stx videoram+571
+	sty colorram+571
+	ldx #'N'-64
+	stx videoram+572
+	sty colorram+572
+	ldx #'D'-64
+	stx videoram+573
+	sty colorram+573
+	ldx #'E'-64
+	stx videoram+574
+	sty colorram+574
+	ldx #'X'-64
+	stx videoram+575
+	sty colorram+575
+
+	ldx #'K'-64
+	stx videoram+651
+	sty colorram+651
+	ldx #'E'-64
+	stx videoram+652
+	sty colorram+652
+	ldx #'Y'-64
+	stx videoram+653
+	sty colorram+653
+
+	ldx #'S'-64
+	stx videoram+731
+	sty colorram+731
+	ldx #'H'-64
+	stx videoram+732
+	sty colorram+732
+	ldx #'I'-64
+	stx videoram+733
+	sty colorram+733
+	ldx #'F'-64
+	stx videoram+734
+	sty colorram+734
+	ldx #'T'-64
+	stx videoram+735
+	sty colorram+735
+
 --- lda #<(videoram+82)
 	sta zvideo
 	sta zcolor
@@ -147,6 +193,12 @@ keymap=$d000
 	sta found
 	lda #88
 	sta scancode
+	sta shiftscancode
+	lda #0
+	bit $01
+	bvs +
+	lda #16
++   sta computedshift
 
 	ldx #0
 	stx kbdline
@@ -162,10 +214,10 @@ keymap=$d000
 	pha ; save keys
 	lda #' ' ; not pressed
 	bcs +
-	; bit found
-	; bmi alreadyfound
 	lda keycounter
-	sta scancode
+	jsr checkifshift
+	beq +
+    sta scancode
 	sec
 	ror found ; mark found
 alreadyfound:	
@@ -198,7 +250,11 @@ alreadyfound:
 	inc zcolor+1
 +	jmp --
 ++	lda scancode
-	lsr
+	cmp #88
+	bne +
+	lda shiftscancode
+	sta scancode ; want to display a scan code even if just shift pressed, overwrite with the last shift scan code
++   lsr
 	lsr
 	lsr
 	lsr
@@ -221,18 +277,111 @@ alreadyfound:
 	adc #$C6
 +	sta videoram+564
 	lda #'#'
-	sta videoram+566
+	sta videoram+567
 	lda scancode
 	jsr div10
 	ora #$B0 ; convert to inverse digit
-	sta videoram+568
+	sta videoram+569
 	txa
 	ora #$B0 ; convert to inverse digit
-	sta videoram+567
+	sta videoram+568
 	ldy color
-	sty colorram+566
 	sty colorram+567
 	sty colorram+568
+	sty colorram+569
+
+	jsr lookupascii
+	lsr
+	lsr
+	lsr
+	lsr
+	ora #$B0 ; reverse zero
+	cmp #$BA ; out of bounds for numeric?
+	bcc + ; branch if okay
+	adc #$C6 ; convert to A..F
++   sta videoram+643
+	lda color	
+	sta colorram+642
+	sta colorram+643
+	sta colorram+644
+	lda #'$'
+	sta videoram+642
+	jsr lookupascii
+	and #$0F
+	ora #$B0
+	cmp #$BA
+	bcc +
+	adc #$C6
++	sta videoram+644
+	lda #'#'
+	sta videoram+646
+	jsr lookupascii
+	jsr div10
+	ora #$B0 ; convert to inverse digit
+	sta videoram+649
+	txa
+	jsr div10
+	ora #$B0 ; convert to inverse digit
+	sta videoram+648
+	txa
+	ora #$B0 ; convert to inverse digit
+	sta videoram+647
+	ldy color
+	sty colorram+646
+	sty colorram+647
+	sty colorram+648
+	sty colorram+649
+
+	lda computedshift
+	lsr
+	pha
+	lda #$00
+	adc #$B0 ; convert C to inverse digit
+	sta videoram+725
+	pla
+	lsr
+	pha
+	lda #$00
+	adc #$B0 ; convert C to inverse digit
+	sta videoram+724
+	pla
+	lsr
+	pha
+	lda #$00
+	adc #$B0 ; convert C to inverse digit
+	sta videoram+723
+	pla
+	lsr
+	pha
+	lda #$00
+	adc #$B0 ; convert C to inverse digit
+	sta videoram+722
+	pla
+	lsr
+	lda #$00
+	adc #$B0 ; convert C to inverse digit
+	sta videoram+721
+	lda #'%'
+    sta videoram+720
+	sty colorram+720
+	sty colorram+721
+	sty colorram+722
+	sty colorram+723
+	sty colorram+724
+	sty colorram+725
+
+	lda computedshift
+	jsr div10
+	ora #$B0 ; convert to inverse digit
+	sta videoram+729
+	sty colorram+729
+	txa
+	ora #$B0 ; convert to inverse digit
+	sta videoram+728
+	sty colorram+728
+	lda #'#'
+	sta videoram+727
+	sty colorram+727
 
 	bit $01
 	bvs +
@@ -316,14 +465,50 @@ alreadyfound:
 	sty colorram + 64
 	sta videoram + 65
 	sty colorram + 65
+
 ++	jmp ---
+
+checkifshift:
+    stx savex
+	ldx scancode
+	stx savescancode
+	sta scancode
+	jsr lookupascii
+	cmp #1
+	beq +
+	cmp #2
+	beq +
+	cmp #4
+	beq +
+	cmp #8
+	beq +
+	cmp #16
+	bne ++
++	php ; save Z set
+	ora computedshift
+    sta computedshift
+	lda scancode
+	sta shiftscancode
+	jsr lookupkey
+	jmp +++
+++  php ; save Z clear
+    lda keycounter
++++	ldx savescancode
+	stx scancode
+    ldx savex
+	plp ; restore Z
+	rts
+
+lookupascii:
+    ldx scancode
+kbdmatrix=*+1
+	lda keymap, x
+++  rts
 
 lookupkey:
 	stx savex
-	ldx keycounter
-kbdmatrix=*+1
-	lda keymap, x
-	cmp #$20
+	jsr lookupascii
+++  cmp #$20
 	bcs +
 	cmp #1
 	bne +
