@@ -24,10 +24,19 @@ LOAD "SCANKEY64MODE",8,1
 SYS 49152
 ````
 
-STOP+RESTORE may get you to a BASIC prompt if you are lucky, keep trying (hold STOP, tap RESTORE repeatedly).  Otherwise reset system.
+TED Usage (supports 64 keys on plus/4, 116, 16):
+
+````
+LOAD "SCANKEYTED 1004",8,1
+SYS DEC("1004")
+````
+
+STOP+RESTORE may get you to a BASIC prompt if you are lucky (except TED machines have no RESTORE), keep trying (hold STOP, tap RESTORE repeatedly).  Otherwise reset system.
 
 Also see project [c-keymaps](https://github.com/davervw/c-keymaps) for more keyboard resources
 
 ![scankey64.png](scankey64.png)
 
 ![scankey128.png](scankey128.png)
+
+![scankeyted.png](scankeyted.png)
