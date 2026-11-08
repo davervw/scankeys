@@ -1,6 +1,8 @@
 # scankeys - demo Commodore 64, 128, and 264 keyboard matrix #
 
-Actively scan Commodore 64/128 keyboard matrix and display pressed keys on screen
+Actively scan Commodore 64/128/264 keyboard matrix and display pressed keys on screen
+
+(264 family includes Commodore 116, 16, plus/4)
 
 C64 Usage (supports 64 keys):
 
