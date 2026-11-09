@@ -13,7 +13,7 @@ ${ACME}/acme -f cbm -o ${PROG64}.prg -l ${PROG64}.lbl -r ${PROG64}.lst ${PROG64}
 && ${ACME}/acme -f cbm -o ${PROG64MODE}.prg -l ${PROG64MODE}.lbl -r ${PROG64MODE}.lst ${PROG64MODE}.asm\
 && ${VICE}/c1541 -attach ${D64}.d64 8 -delete "${PROG64MODE}" -write ${PROG64MODE}.prg ${PROG64MODE} \
 && ${ACME}/acme -f cbm -o ${PROGTED}.prg -l ${PROGTED}.lbl -r ${PROGTED}.lst ${PROGTED}.asm \
-&& ${VICE}/c1541 -attach ${D64}.d64 8 -delete "${PROGTED} 1004" -write ${PROGTED}.prg "${PROGTED} 1004" \
+&& ${VICE}/c1541 -attach ${D64}.d64 8 -delete "${PROGTED} 1202" -write ${PROGTED}.prg "${PROGTED} 1202" \
 && ${VICE}/xplus4 -moncommands ${PROG64MODE}.lbl ${D64}.d64 >/dev/null 2>&1 &
 #&& ${VICE}/x64sc -moncommands ${PROG64}.lbl ${D64}.d64 >/dev/null 2>&1 &
 #&& ${VICE}/x128 -moncommands ${PROG64MODE}.lbl ${D64}.d64 >/dev/null 2>&1 &
