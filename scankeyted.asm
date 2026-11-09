@@ -33,7 +33,7 @@ keymap = $0000
 keydecode = $545;$546
 mapptr = $ec;$ed
 
-*=$1202
+*=$1204
     sta $FF3E ; ROM BANKED IN
 	lda #<pressakey
 	ldx #>pressakey
