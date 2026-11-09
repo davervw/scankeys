@@ -29,8 +29,8 @@ SYS 49152
 TED Usage (supports 64 keys on plus/4, 116, 16):
 
 ````
-LOAD "SCANKEYTED 1004",8,1
-SYS DEC("1004")
+LOAD "SCANKEYTED 1202",8,1
+SYS DEC("1202")
 ````
 
 STOP+RESTORE may get you to a BASIC prompt if you are lucky (except TED machines have no RESTORE), keep trying (hold STOP, tap RESTORE repeatedly).  Otherwise reset system.
